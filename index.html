@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Radio Player</title>
+<style>
+  :root { color-scheme: light dark; --bg: #111318; --fg: #eaeaea; --accent: #6fb1ff; }
+  @media (prefers-color-scheme: light) {
+    :root:not([data-theme="dark"]) { --bg: #f4f4f6; --fg: #1a1a1a; --accent: #2a6fd6; }
+  }
+  html, body { height: 100%; margin: 0; }
+  body {
+    background: var(--bg); color: var(--fg);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    display: flex; align-items: center; justify-content: center;
+    padding-top: env(safe-area-inset-top, 0px);
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+  .card { text-align: center; padding: 1.25rem 1.5rem; max-width: 90vw; }
+  h1 { font-size: 1rem; font-weight: 600; margin: 0 0 0.75rem 0; color: var(--accent); word-break: break-word; }
+  #status { font-size: 0.9rem; opacity: 0.8; margin-top: 0.5rem; }
+  audio { width: min(320px, 80vw); }
+</style>
+</head>
+<body>
+  <div class="card">
+    <h1 id="label">Loading stream…</h1>
+    <audio id="player" autoplay controls></audio>
+    <div id="status"></div>
+  </div>
+<script>
+  function getParam(name) { return new URLSearchParams(window.location.search).get(name); }
+  var streamUrl = getParam('url');
+  var label = document.getElementById('label');
+  var status = document.getElementById('status');
+  var audio = document.getElementById('player');
+  if (!streamUrl) {
+    label.textContent = 'No stream URL provided';
+    status.textContent = "Append ?url=<stream address> to this page's URL.";
+  } else {
+    label.textContent = decodeURIComponent(streamUrl);
+    audio.src = streamUrl;
+    audio.play().then(function () { status.textContent = 'Playing'; })
+      .catch(function (err) { status.textContent = 'Could not autoplay: ' + err.message; });
+    audio.addEventListener('error', function () {
+      status.textContent = 'Stream failed to load. Check the URL is a direct audio stream.';
+    });
+  }
+</script>
+</body>
+</html>
